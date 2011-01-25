@@ -1,5 +1,7 @@
 <?php
 
+define('BASE_PATH', '/~albo/pragmore/2011/rubra/logistica/workspace/Encaminar/demo');
+
 require_once '../lib/Encaminar.php';
 
 class FrontController
@@ -7,16 +9,34 @@ class FrontController
     /** @Route("GET /") */
     public function index()
     {
-        return "Home";
+        $this->_render("Welcome!");
     }
-    /** @Route("GET /hello") */
-    public function hello()
+    /** @Route("GET /hello/:name") */
+    public function hello($params)
     {
-        return "Hello";
+        $this->_render("Hello " . $params['name']);
+    }
+    
+    private function _render($message)
+    {
+    	$base = BASE_PATH;
+		echo <<<EOHTML
+		<html>
+		<body>
+			<h1>Encaminar</h1>
+			<p>A PHP routing library</p>
+			<a href="$base">Home</a>
+			<a href="$base/hello/world">Hello world</a>
+			<a href="$base/hello/hello">Hello hello</a>
+			<p><strong>$message</strong></p>
+		</body>
+EOHTML;
     }
 }
 
 $encaminar = new Encaminar();
-$url = strrchr($_SERVER['REQUEST_URI'], '/~albo/pragmore/2011/rubra/logistica/workspace/Encaminar/demo');
-$encaminar->setUrl($url)->setHttpMethod($_SERVER['REQUEST_METHOD']);
-echo $encaminar(new FrontController);
+$encaminar->setBasePath(BASE_PATH)
+          ->setUrl($_SERVER['REQUEST_URI'])
+          ->setHttpMethod($_SERVER['REQUEST_METHOD']);
+
+$encaminar(new FrontController);
