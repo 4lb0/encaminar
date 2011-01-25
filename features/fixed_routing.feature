@@ -58,6 +58,6 @@ Feature: Fixed routing
     When I set the url "/not-found"
     And I set the method "GET"
     And I set up the front controller as "Error"
-    Then the exception should be "Encaminar\NotFound"  
+    Then the exception should be "Encaminar\NotFoundException"  
     
     

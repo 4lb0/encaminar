@@ -1,6 +1,6 @@
 <?php
 /**
- * Exception
+ * Not Found Exception
  * 
  * PHP Version 5.3
  * 
@@ -12,8 +12,10 @@
  */
 namespace Encaminar;
 
+require_once __DIR__ . '/Exception.php';
+
 /**
- * Exception
+ * Not Found Exception
  * 
  * @category Encaminar
  * @package  Encaminar
@@ -21,6 +23,6 @@ namespace Encaminar;
  * @license  MIT License - https://github.com/4lb0/encaminar/LICENSE
  * @link     https://github.com/4lb0/encaminar
  */
-class Exception extends \Exception
+class NotFoundException extends Exception
 {
 }
