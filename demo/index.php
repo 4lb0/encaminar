@@ -1,6 +1,6 @@
 <?php
 
-define('BASE_PATH', '/~albo/pragmore/2011/rubra/logistica/workspace/Encaminar/demo');
+define('BASE_PATH', '/');
 
 require_once '../lib/Encaminar.php';
 
