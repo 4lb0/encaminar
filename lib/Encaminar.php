@@ -74,9 +74,14 @@ class Encaminar
         $path = str_replace('//', '/', $path);
         foreach ($httpMethods as $httpMethod) {
             $httpMethod = strtoupper($httpMethod);
-            $mapper->connect("$httpMethod..$path", $match);
+            $mapper->connect($this->url($httpMethod, $path), $match);
         }
     }
+    
+    protected function url($httpMethod, $path)
+    {
+    	return "$httpMethod..$path";
+    } 
 
     public function __invoke($controller = null)
     {
@@ -99,16 +104,25 @@ class Encaminar
         }
     }
 
+    public function match($httpMethod, $path)
+    {
+        $url = $this->url($httpMethod, $path);
+	    $match = Net_URL_Mapper::getInstance()->match($url);
+    	if (!$match) {
+    		return array(false, false);
+    	}
+        $method = $match[self::MATCH_METHOD_PARAM];
+        unset($match[self::MATCH_METHOD_PARAM]);
+        return array($method, $match);
+    }
+    
     public function dispatch($controller)
     {
         $path = $this->getUrl();
         do {
-        	$url = $this->getHttpMethod() . '..' . $path;
-	        $match = Net_URL_Mapper::getInstance()->match($url);
-	        if ($match) {
-	        	$method = $match[self::MATCH_METHOD_PARAM];
-	        	unset($match[self::MATCH_METHOD_PARAM]);
-	            $response = $controller->$method($match);
+        	list($method, $params) = $this->match($this->getHttpMethod(), $path);
+	        if ($method) {
+	            $response = $controller->$method($params);
 	            if ($response instanceof self) {
 	            	$response->setHttpMethod($this->getHttpMethod());
 	            	$response->setUrl($this->getUrl());
