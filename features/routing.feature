@@ -1,41 +1,27 @@
-Feature: Fixed routing
-  Create simple routes without specific page controllers.
+Feature: Routing
+
+  Assign route in the method that I want to use as controller.
+
   As web developer I want to simplify the route set up.
-  Scenario: Simple route
-    Given a class "Example" with methods "/** @Route("GET /hello") */ public function home(){ return 'Hello!'; }"
-    When I set the url "/hello"
-    And I set the method "GET"
-    And I set up the front controller as "Example"
-    Then the output should be "Hello!"
 
-  Scenario: Call index
-    Given a class "IndexController" with methods "/** @Route("GET /") */ public function indexAction(){ return 'index'; }"
-    When I set the url "/"
-    And I set the method "GET"
-    And I set up the front controller as "IndexController"
-    Then the output should be "index"
+  Scenario Outline: Simple routes
+    Given a class "<class>" with methods "<methods>"
+    When I set the url "<url>"
+    And I set the method "<http>"
+    And I set up the front controller as "<class>"
+    Then the output should be "<output>"
 
-  Scenario: Ambigous routes
-    Given a class "A" with methods "/** @Route("GET /a") */ function a(){ return 'a'; } /** @Route("GET /aa") */ function aa(){ return 'aa'; }"
-    When I set the url "/a"
-    And I set the method "GET"
-    And I set up the front controller as "A"
-    Then the output should be "a"
+  Examples:
+    | class     | url      | http | output | methods |
+    | Example   | /hello   | GET  | Hello! | /** @Route("GET /hello") */ public function home(){ return 'Hello!'; } |
+    | Index     | /        | GET  | index  | /** @Route("GET /") */ public function indexAction(){ return 'index'; } |
+    | Ambiguous | /a       | GET  | a      | /** @Route("GET /a") */ function a(){ return 'a'; } /** @Route("GET /aa") */ function aa(){ return 'aa'; } |
+    | TrimSlash | /s/      | GET  | slash  | /** @Route("GET /s") */ function s(){ return 'slash'; } |
+    | HttpMethd | /        | POST | post   | /** @Route("GET /") */ function g(){ return 'get'; } /** @Route("POST /") */ function p(){ return 'post'; }  |
+    | OneParam  | /user/1  | GET  | usr 1  | /** @Route("GET /user/:id") */ public function usr($params){ return 'usr '.$params['id']; } |
+    | MultParam | /a/11/02 | GET  | 02-11  | /** @Route("GET /a/:y/:m") */ public function archive($p){ return $p['m'].'-'.$p['y']; } |
 
-  Scenario: Get with last slash is the same that without the slash
-    Given a class "S" with methods "/** @Route("GET /s") */ function s(){ return 's'; }"
-    When I set the url "/s/"
-    And I set the method "GET"
-    And I set up the front controller as "S"
-    Then the output should be "s"
-
-  Scenario: Different HTTP method
-    Given a class "M" with methods "/** @Route("GET /") */ function g(){ return 'G'; } /** @Route("POST /") */ function p(){ return 'P'; }"
-    When I set the url "/"
-    And I set the method "POST"
-    And I set up the front controller as "M"
-    Then the output should be "P"
-
+    
   Scenario: Chain routes
     Given a class "How" with methods "/** @Route("GET /how/") */ function h(){ return new Encaminar(new You); }"
     And a class "You" with methods "/** @Route("GET /are/you") */ function a(){ return new Encaminar(new Today); }"
@@ -52,6 +38,14 @@ Feature: Fixed routing
     And I set the method "GET"
     And I set up the front controller as "Main"
     Then the output should be "Admin Index"  
+        
+  Scenario: Get multiple params in the URL
+    Given a class "Gallery" with methods "/** @Route("GET /gallery/:id") */ public function g($p){ $ph = new Photo; $ph->gallery = $p['id']; return new Encaminar($ph); }"
+    And a class "Photo" with methods "/** @Route("GET photo/:id") */ public function p($p){ return $this->gallery . '.' . $p['id']; }"
+    When I set the url "/gallery/32/photo/127"
+    And I set the method "GET"
+    And I set up the front controller as "Gallery"
+    Then the output should be "32.127"
     
   Scenario: Not found URL
     Given a class "Error" with methods "/** @Route("GET /") */ function index(){ return 'index'; }"
@@ -59,5 +53,4 @@ Feature: Fixed routing
     And I set the method "GET"
     And I set up the front controller as "Error"
     Then the exception should be "Encaminar\NotFoundException"  
-    
     
